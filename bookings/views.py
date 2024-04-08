@@ -25,7 +25,7 @@ class BookingModelViewSet(ModelViewSet):
             return queryset.filter(user=self.request.user)
 
     def get_permissions(self):
-        if self.action in ('update', 'destroy',):
+        if self.action in ('update', 'destroy', 'partial_update'):
             self.permission_classes = (IsAdminUser,)
         return super(BookingModelViewSet, self).get_permissions()
 
@@ -53,7 +53,7 @@ class BookingModelViewSet(ModelViewSet):
         except ValidationError as e:
             return Response({'dates': e.message}, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=['patch'])
+    @action(detail=True, methods=['patch'], url_name='booking-cancel')
     def cancel(self, request, pk=None):
         booking = self.get_object()
         booking.status = Booking.CANCELED

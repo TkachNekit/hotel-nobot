@@ -19,7 +19,7 @@ def filter_by_price(request, rooms_queryset):
     return rooms_queryset
 
 
-def filter_by_capacity(request, rooms_queryset):
+def filter_by_min_capacity(request, rooms_queryset):
     capacity = request.query_params.get('capacity')
     if capacity:
         rooms_queryset = rooms_queryset.filter(capacity__gte=capacity)
@@ -59,7 +59,7 @@ def sort_queryset(request, rooms_queryset):
 class RoomFilter(filters.BaseFilterBackend):
     def filter_queryset(self, request, rooms_queryset, view):
         rooms_queryset = filter_by_price(request, rooms_queryset)
-        rooms_queryset = filter_by_capacity(request, rooms_queryset)
+        rooms_queryset = filter_by_min_capacity(request, rooms_queryset)
         rooms_queryset = filter_by_availability(request, rooms_queryset)
         rooms_queryset = sort_queryset(request, rooms_queryset)
         return rooms_queryset

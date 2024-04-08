@@ -1,6 +1,5 @@
 from decimal import Decimal
 
-from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 
@@ -29,26 +28,3 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"Booking on room №{self.room.number} on dates: {self.checkin_date} - {self.checkout_date}"
-
-    def save(self, *args, **kwargs):
-        # Check if only the status field is being updated
-        if 'update_fields' in kwargs:
-            if 'status' in kwargs['update_fields'] and len(kwargs['update_fields']) == 1:
-                # Only updating the status, no need to perform room availability check
-                super().save(*args, **kwargs)
-        else:
-            if not Room.objects.filter(number=self.room.number).exists():
-                raise ValidationError("Room with given room number doesn't exist.")
-
-            # Validate dates
-            difference = self.checkout_date - self.checkin_date
-            if difference.days < 1:
-                raise ValidationError("Checkout date can't be earlier than 1 day after check-in.")
-
-            # Check room availability
-            if not self.room.is_room_available_for(self.checkin_date, self.checkout_date):
-                raise ValidationError("Room unavailable for these dates.")
-
-            self.price = self.room.current_price * difference.days
-
-            super().save(*args, **kwargs)

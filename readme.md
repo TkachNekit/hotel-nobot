@@ -16,9 +16,12 @@ The Hotel Booking System is a convenient application that allows users to easily
 
 ---
 - Django.
-- Django REST Framework:for API.
+- Django REST Framework: for API.
+- Djoser for authorization.
 - PostgreSQL.
+- PyTest.
 - Linters: _isort_ + _flake8_.
+- drf-yasg for API docs.
 
 ## Installation
 
@@ -34,12 +37,12 @@ All actions should be executed from the source directory of the project and only
    pip install --upgrade pip
    pip install -r requirements.txt
    ```
-3. Run project dependencies, migrations, fill the database with the fixture data etc.:
+3. Run project dependencies, migrations, tests, fill the database with the fixture data etc.:
    ```
    python manage.py migrate
-   python manage.py loaddata data.json
+   python manage.py loaddata fixtures/data.json
    
-   python manage.py bot
+   pytest
    python manage.py runserver 
    ```
    Run last 2 commands separately 
@@ -64,6 +67,31 @@ DATABASE_PORT=1234
 
 ---
 
+docs you can read on `http://127.0.0.1:8000/swagger/` <br>
+Main endpoints: <br>
+#### Auth
+- POST http://127.0.0.1:8000/api-token-auth/  - for obtaining auth token for our superuser
+- GET http://127.0.0.1:8000/api/auth/users/ - returns list of authorized users
+- POST http://127.0.0.1:8000/api/auth/users/ - registers new user
+- POST http://127.0.0.1:8000/api/auth/token/login/ - returns auth token which can be used by user for auth
+- POST http://127.0.0.1:8000/api/auth/token/logout/ - deactivates auth token for user (should place auth token in header)
+#### Rooms
+- GET http://127.0.0.1:8000/api/rooms/ - returns list of rooms <br>
+*Sort and filter with query params:*
+  - Sort by = (price_asc, price_desc, capacity_asc, capacity_desc) http://127.0.0.1:8000/api/rooms/?sort_by=price_asc
+  - Filter by min capacity of room capacity http://127.0.0.1:8000/api/rooms/?capacity=3
+  - Filter by min and max cost http://127.0.0.1:8000/api/rooms/?max_price=200000&min_price=3000
+  - Filter by rooms availability http://127.0.0.1:8000/api/rooms/?checkin=2024-10-9&checkout=2024-10-10
+- GET http://127.0.0.1:8000/api/rooms/ - returns specific of room
+- POST http://127.0.0.1:8000/api/rooms/ - creates room (Admin only)
+- PATCH http://127.0.0.1:8000/api/rooms/<pk:int>/ - patch specific room (Admin only)
+- DEL http://127.0.0.1:8000/api/rooms/<pk:int>/ - delete specific room (Admin only)
+#### Bookings (Token auth needed)
+- GET http://127.0.0.1:8000/api/bookings/ - returns list of user's bookings (for admin returns all bookings)
+- POST http://127.0.0.1:8000/api/bookings/ - creates booking (if this room is not already booked for these dates)
+- PATCH http://127.0.0.1:8000/api/bookings/<pk:int>/cancel/ - cancels user's booking (Admin can cancel any booking)
+- PATCH http://127.0.0.1:8000/api/bookings/<pk:int>/ - patch specific booking (Admin only)
+- DEL http://127.0.0.1:8000/api/bookings/<pk:int>/ - delete specific booking (Admin only)
 
 
 
