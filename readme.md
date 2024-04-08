@@ -45,7 +45,6 @@ All actions should be executed from the source directory of the project and only
    pytest
    python manage.py runserver 
    ```
-   Run last 2 commands separately 
 
 ### Example of .env file
 
