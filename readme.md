@@ -84,14 +84,14 @@ Main endpoints: <br>
   - Filter by rooms availability http://127.0.0.1:8000/api/rooms/?checkin=2024-10-9&checkout=2024-10-10
 - GET http://127.0.0.1:8000/api/rooms/ - returns specific of room
 - POST http://127.0.0.1:8000/api/rooms/ - creates room (Admin only)
-- PATCH http://127.0.0.1:8000/api/rooms/&lt;pk:int&gt;/ - patch specific room (Admin only)
-- DEL http://127.0.0.1:8000/api/rooms/&lt;pk:int&gt;/ - delete specific room (Admin only)
+- PATCH http://127.0.0.1:8000/api/rooms/(pk:int)/ - patch specific room (Admin only)
+- DEL http://127.0.0.1:8000/api/rooms/(pk:int)/ - delete specific room (Admin only)
 #### Bookings (with auth token only)
 - GET http://127.0.0.1:8000/api/bookings/ - returns list of user's bookings (for admin returns all bookings)
 - POST http://127.0.0.1:8000/api/bookings/ - creates booking (if this room is not already booked for these dates)
-- PATCH http://127.0.0.1:8000/api/bookings/&lt;pk:int&gt;/cancel/ - cancels user's booking (Admin can cancel any booking)
-- PATCH http://127.0.0.1:8000/api/bookings/&lt;pk:int&gt;/ - patch specific booking (Admin only)
-- DEL http://127.0.0.1:8000/api/bookings/&lt;pk:int&gt;/ - delete specific booking (Admin only)
+- PATCH http://127.0.0.1:8000/api/bookings/(pk:int)/cancel/ - cancels user's booking (Admin can cancel any booking)
+- PATCH http://127.0.0.1:8000/api/bookings/(pk:int)/ - patch specific booking (Admin only)
+- DEL http://127.0.0.1:8000/api/bookings/(pk:int)/ - delete specific booking (Admin only)
 
 
 
