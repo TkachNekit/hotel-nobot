@@ -86,7 +86,7 @@ Main endpoints: <br>
 - POST http://127.0.0.1:8000/api/rooms/ - creates room (Admin only)
 - PATCH http://127.0.0.1:8000/api/rooms/<pk:int>/ - patch specific room (Admin only)
 - DEL http://127.0.0.1:8000/api/rooms/<pk:int>/ - delete specific room (Admin only)
-#### Bookings (Token auth needed)
+#### Bookings (with auth token only)
 - GET http://127.0.0.1:8000/api/bookings/ - returns list of user's bookings (for admin returns all bookings)
 - POST http://127.0.0.1:8000/api/bookings/ - creates booking (if this room is not already booked for these dates)
 - PATCH http://127.0.0.1:8000/api/bookings/<pk:int>/cancel/ - cancels user's booking (Admin can cancel any booking)
