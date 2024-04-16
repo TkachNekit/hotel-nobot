@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 
@@ -10,7 +11,6 @@ from users.models import User
 class Booking(models.Model):
     BOOKED = 0
     CANCELED = 1
-    EXPIRED = 2
 
     STATUSES = (
         (BOOKED, 'Booked'),
@@ -28,3 +28,9 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"Booking on room №{self.room.number} on dates: {self.checkin_date} - {self.checkout_date}"
+
+    def clean(self):
+        if not self.room.is_room_available_for(checkin_date=self.checkin_date, checkout_date=self.checkout_date):
+            raise ValidationError("This room is already booked on this dates")
+        if not self.checkin_date < self.checkout_date:
+            raise ValidationError("Checkout day should be at least 1 day after checkin")

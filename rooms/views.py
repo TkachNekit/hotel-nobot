@@ -1,76 +1,42 @@
-from datetime import datetime
-
-from rest_framework import filters
-from rest_framework.exceptions import ValidationError as RestValidationError
+from django_filters import rest_framework as filters
 from rest_framework.permissions import IsAdminUser
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from rooms.filters import RoomFilter
 from rooms.models import Room
 from rooms.serializers import RoomSerializer
-
-
-def filter_by_price(request, rooms_queryset):
-    min_price = request.query_params.get('min_price')
-    max_price = request.query_params.get('max_price')
-    if min_price:
-        rooms_queryset = rooms_queryset.filter(current_price__gte=min_price)
-    if max_price:
-        rooms_queryset = rooms_queryset.filter(current_price__lte=max_price)
-    return rooms_queryset
-
-
-def filter_by_min_capacity(request, rooms_queryset):
-    capacity = request.query_params.get('capacity')
-    if capacity:
-        rooms_queryset = rooms_queryset.filter(capacity__gte=capacity)
-    return rooms_queryset
-
-
-def filter_by_availability(request, rooms_queryset):
-    checkin_date_str = request.query_params.get('checkin')
-    checkout_date_str = request.query_params.get('checkout')
-    if checkin_date_str and checkout_date_str:
-        try:
-            checkin_date = datetime.strptime(checkin_date_str, '%Y-%m-%d').date()
-            checkout_date = datetime.strptime(checkout_date_str, '%Y-%m-%d').date()
-        except ValueError:
-            raise RestValidationError({'detail': "Invalid date format"})
-
-        room_ids = [room.id for room in rooms_queryset if room.is_room_available_for(checkin_date, checkout_date)]
-
-        rooms_queryset = rooms_queryset.filter(id__in=room_ids)
-    return rooms_queryset
-
-
-def sort_queryset(request, rooms_queryset):
-    sort_by = request.query_params.get('sort_by')
-    if sort_by:
-        if sort_by == 'price_asc':
-            rooms_queryset = rooms_queryset.order_by('current_price')
-        elif sort_by == 'price_desc':
-            rooms_queryset = rooms_queryset.order_by('-current_price')
-        elif sort_by == 'capacity_asc':
-            rooms_queryset = rooms_queryset.order_by('capacity')
-        elif sort_by == 'capacity_desc':
-            rooms_queryset = rooms_queryset.order_by('-capacity')
-    return rooms_queryset
-
-
-class RoomFilter(filters.BaseFilterBackend):
-    def filter_queryset(self, request, rooms_queryset, view):
-        rooms_queryset = filter_by_price(request, rooms_queryset)
-        rooms_queryset = filter_by_min_capacity(request, rooms_queryset)
-        rooms_queryset = filter_by_availability(request, rooms_queryset)
-        rooms_queryset = sort_queryset(request, rooms_queryset)
-        return rooms_queryset
 
 
 class RoomModelViewSet(ModelViewSet):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
-    filter_backends = [RoomFilter]
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = RoomFilter
 
     def get_permissions(self):
         if self.action in ('create', 'update', 'destroy', 'partial_update'):
             self.permission_classes = (IsAdminUser,)
         return super(RoomModelViewSet, self).get_permissions()
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        filterset = self.filterset_class(self.request.GET, queryset=queryset)
+        # apply custom filter + sort
+        qs = RoomFilter.filter_by_availability(self.request, filterset.qs)
+        sorted_qs = RoomFilter.sort_queryset(self.request, rooms_queryset=qs)
+        return sorted_qs
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)

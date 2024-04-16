@@ -77,9 +77,9 @@ Main endpoints: <br>
 #### Rooms
 - GET http://127.0.0.1:8000/api/rooms/ - returns list of rooms <br>
 *Sort and filter with query params:*
-  - Sort by = (price_asc, price_desc, capacity_asc, capacity_desc) http://127.0.0.1:8000/api/rooms/?sort_by=price_asc
+  - Sort by = (price, -price, capacity, -capacity) http://127.0.0.1:8000/api/rooms/?sort_by=price
   - Filter by min capacity of room capacity http://127.0.0.1:8000/api/rooms/?capacity=3
-  - Filter by min and max cost http://127.0.0.1:8000/api/rooms/?max_price=200000&min_price=3000
+  - Filter by min and max cost http://127.0.0.1:8000/api/rooms/?current_price__lt=200000&current_price__gt=3000
   - Filter by rooms availability http://127.0.0.1:8000/api/rooms/?checkin=2024-10-9&checkout=2024-10-10
 - GET http://127.0.0.1:8000/api/rooms/ - returns specific of room
 - POST http://127.0.0.1:8000/api/rooms/ - creates room (Admin only)
